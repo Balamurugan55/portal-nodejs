@@ -144,6 +144,8 @@ router.post('/cusprofile',(req,res)=>{
 router.post('/inquiry',(req,res)=>{
     var cusid=req.body.cusid;
     var doctype=req.body.doctype;
+    //var cusid=11;
+    //var doctype='A';
     console.log(req);
     var xml=`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
     <soapenv:Header/>
@@ -184,5 +186,188 @@ router.post('/inquiry',(req,res)=>{
     res.status(200).send(result);
   })();
 });
+router.post('/inqdata',(req,res)=>{
+    //var saledoc=10000048;
+    var saledoc=req.body.saledoc;
+    console.log(saledoc);
+    var xml=`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+    <soapenv:Header/>
+    <soapenv:Body>
+       <urn:ZBAPICUSINQ>
+          <!--You may enter the following 3 items in any order-->
+          <SALEDOC>${saledoc}</SALEDOC>
+       </urn:ZBAPICUSINQ>
+    </soapenv:Body>
+ </soapenv:Envelope>`;
+//  const temp={
+//    OPER:'OPERATION',
+//    REC_DATE:'REC_DATE',
+//    REC_TIME:'REC_TIME',
+//    CREATED_BY:'CREATED_BY',
+//    DOC_DATE:'DOC_DATE',
+//    TRAN_GROUP:'TRAN_GROUP',
+//    DOC_TYPE:'DOC_TYPE',
+//    NET_VAL:'NET_VAL_HD',
+//    CURRENCY:'CURRENCY',
+//    SALES_ORG:'SALES_ORG',
+//    LINEITEMS:['//SOAP:Body//INQ_LINE/item',{
+//   DOC_NUMBER:'DOC_NUMBER',
+//   ITM_NUMBER:'ITM_NUMBER',
+//    MATERIAL:'MATERIAL',
+//    MAT_ENTRD:'MAT_ENTRD',
+//    MATL_GROUP:'MATL_GROUP',
+//    SHORT_TEXT:'SHORT_TEXT',
+//    ITEM_CATEG:'ITEM_CATEG',
+//    ORDER_PROB:'ORDER_PROB',
+//    CREAT_DATE:'CREAT_DATE',
+//    CREATED_BY:'CREATED_BY'
+//   }],
+//   RETURN:['//SOAP:Body//RETURN/item',{TYPE:'TYPE'}]
+//  };
+ const temp={
+   headers:['//SOAP:Body//INQ_HEAD',{
+  OPER:'OPERATION',
+  REC_DATE:'REC_DATE',
+  REC_TIME:'REC_TIME',
+  CREATED_BY:'CREATED_BY',
+  DOC_DATE:'DOC_DATE',
+  TRAN_GROUP:'TRAN_GROUP',
+  DOC_TYPE:'DOC_TYPE',
+  NET_VAL:'NET_VAL_HD',
+  CURRENCY:'CURRENCY',
+  SALES_ORG:'SALES_ORG'}],
+  LINEITEMS:['//SOAP:Body//INQ_LINE/item',{
+ DOC_NUMBER:'DOC_NUMBER',
+ ITM_NUMBER:'ITM_NUMBER',
+  MATERIAL:'MATERIAL',
+  MAT_ENTRD:'MAT_ENTRD',
+  MATL_GROUP:'MATL_GROUP',
+  SHORT_TEXT:'SHORT_TEXT',
+  ITEM_CATEG:'ITEM_CATEG',
+  ORDER_PROB:'ORDER_PROB',
+  CREAT_DATE:'CREAT_DATE',
+  CREATED_BY:'CREATED_BY'
+ }],
+ RETURN:['//SOAP:Body//RETURN/item',{TYPE:'TYPE'}]
+};
+ const url = 'http://dxktpipo.kaarcloud.com:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BC_CUSINQ&receiverParty=&receiverService=&interface=SI_CUSINQ&interfaceNamespace=http://bala.com';
+  var xmlData;
+  (async () => {
+    const { response } = await soapRequest({ url: url, headers: sampleHeaders, xml: xml, timeout: 10000 });
+    const { headers, body, statusCode } = response;
+    console.log(headers);
+    console.log(body);
+    console.log(statusCode);
+  
+    xmlData = body;
+    const result = await transform(xmlData, temp);
+    console.log(result);
+    res.status(200).send(result);
+  })();
+});
+router.post('/cusdeli',(req,res)=>{
+  var cusid=req.body.cusid;
+  //cusid=179999;
+  var xml=`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+  <soapenv:Header/>
+  <soapenv:Body>
+     <urn:ZBAPICUSDELI_FM>
+        <!--You may enter the following 4 items in any order-->
+        <CUSID>${cusid}</CUSID>
+       
+     </urn:ZBAPICUSDELI_FM>
+  </soapenv:Body>
+</soapenv:Envelope>`
+const temp={HEADER:['//SOAP:Body//IT_DELIHEAD/item',{VBELN:'VBELN',VSTEL:'VSTEL',WADAT:'WADAT',INCO2:'INCO2',NTGEW:'NTGEW',GEWEI:'GEWEI',LFART:'LFART',ERDAT:'ERDAT',ERNAM:'ERNAM',VKORG:'VKORG'}],
+LINE:['//SOAP:Body//IT_DELILINE/item',{VBELN:'VBELN',MATNR:'MATNR',MATWA:'MATWA',ARKTX:'ARKTX',NTGEW:'NTGEW',GEWEI:'GEWEI',MBDAT:'MBDAT',LGMNG:'LGMNG',ERDAT:'ERDAT',ERNAM:'ERNAM'}],
+RETURN:['//SOAP:Body//RETURN',{TYPE:'TYPE'}]
+};
+  const url = 'http://dxktpipo.kaarcloud.com:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BC_CUSDELI&receiverParty=&receiverService=&interface=SI_CUSDELI&interfaceNamespace=http://bala.com';
+ var xmlData;
+ (async () => {
+   const { response } = await soapRequest({ url: url, headers: sampleHeaders, xml: xml, timeout: 10000 });
+   const { headers, body, statusCode } = response;
+   console.log(headers);
+   console.log(body);
+   console.log(statusCode);
+ 
+   xmlData = body;
+   const result = await transform(xmlData, temp);
+   console.log(result);
+   res.status(200).send(result);
+ })();
+
+})
+router.post('/cussaleor',(req,res)=>{
+  var cusid=req.body.cusid;
+  //cusid=179999;
+  var xml=`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+  <soapenv:Header/>
+  <soapenv:Body>
+     <urn:ZBAPICUSSALEOR_FM>
+        <!--You may enter the following 2 items in any order-->
+        <CUSID>${cusid}</CUSID>
+        
+     </urn:ZBAPICUSSALEOR_FM>
+  </soapenv:Body>
+</soapenv:Envelope>`
+const temp={SALESORDERS:['//SOAP:Body//IT_CUSSALEOR/item',{SD_DOC:'SD_DOC',ITM_NUMBER:'ITM_NUMBER',MATERIAL:'MATERIAL',SHORT_TEXT:'SHORT_TEXT',NAME:'NAME',DOC_DATE:'DOC_DATE',NET_VAL:'NET_VAL',CURRENCY:'CURRENCY',SALES_ORG:'SALES_ORG',EXCHG_RATE:'EXCHG_RATE'}]
+};
+  const url = 'http://dxktpipo.kaarcloud.com:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BC_CUSSALEOR&receiverParty=&receiverService=&interface=SI_CUSSALEOR&interfaceNamespace=http://bala.com';
+ var xmlData;
+ (async () => {
+   const { response } = await soapRequest({ url: url, headers: sampleHeaders, xml: xml, timeout: 10000 });
+   const { headers, body, statusCode } = response;
+   console.log(headers);
+   console.log(body);
+   console.log(statusCode);
+ 
+   xmlData = body;
+   const result = await transform(xmlData, temp);
+   console.log(result);
+   res.status(200).send(result);
+ })();
+
+})
+
+router.post('/cuscredit',(req,res)=>{
+   var cusid=req.body.cusid;
+   var xml=`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:ZBAPICUSCRED_FM>
+         <!--You may enter the following 3 items in any order-->
+         <CUSID>${cusid}</CUSID>
+         <IT_CUSCRED>
+            <!--Zero or more repetitions:-->
+          
+         </IT_CUSCRED>
+         <IT_CUSDEB>
+            
+         </IT_CUSDEB>
+      </urn:ZBAPICUSCRED_FM>
+   </soapenv:Body>
+</soapenv:Envelope>`
+const temp={CREDIT:['//SOAP:Body//IT_CUSCRED/item',{COMP_CODE:'COMP_CODE',ITEM_NUM:'ITEM_NUM',ALLOC_NMBR:'ALLOC_NMBR',FISC_YEAR:'FISC_YEAR',DOC_NO:'DOC_NO',DOC_DATE:'DOC_DATE',LC_AMOUNT:'LC_AMOUNT',CURRENCY:'CURRENCY',PSTNG_DATE:'PSTNG_DATE',ENTRY_DATE:'ENTRY_DATE'}],
+DEBIT:['//SOAP:Body//IT_CUSDEB/item',{COMP_CODE:'COMP_CODE',ITEM_NUM:'ITEM_NUM',ALLOC_NMBR:'ALLOC_NMBR',FISC_YEAR:'FISC_YEAR',DOC_NO:'DOC_NO',DOC_DATE:'DOC_DATE',LC_AMOUNT:'LC_AMOUNT',CURRENCY:'CURRENCY',PSTNG_DATE:'PSTNG_DATE',ENTRY_DATE:'ENTRY_DATE'}],
+RETURN:'//SOAP:Body//RETURN/TYPE'
+};
+   const url = 'http://dxktpipo.kaarcloud.com:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BC_CUSCRED&receiverParty=&receiverService=&interface=SI_CUSCRED&interfaceNamespace=http://bala.com';
+  var xmlData;
+  (async () => {
+    const { response } = await soapRequest({ url: url, headers: sampleHeaders, xml: xml, timeout: 10000 });
+    const { headers, body, statusCode } = response;
+    console.log(headers);
+    console.log(body);
+    console.log(statusCode);
+  
+    xmlData = body;
+    const result = await transform(xmlData, temp);
+    console.log(result);
+    res.status(200).send(result);
+  })();
+
+})
+
 
 module.exports = router;
