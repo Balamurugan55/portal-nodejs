@@ -3,6 +3,10 @@ var router = express.Router();
 var jwt=require('jsonwebtoken');
 var soapRequest = require('easy-soap-request');
 var { transform} = require('camaro');
+var multer=require('multer');
+var path= require('path');
+var reader= require('xlsx');
+var fs= require('fs');
 const { post } = require('.');
 const sampleHeaders = {
   'user-agent': 'sampleTest',
@@ -298,6 +302,45 @@ RETURN:['//SOAP:Body//RETURN',{TYPE:'TYPE'}]
  })();
 
 })
+router.post('/cussave',(req,res)=>{
+  //var cusid=req.body.cusid;
+  //cusid=179999;
+  console.log(req.body);
+  var xml=`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+  <soapenv:Header/>
+  <soapenv:Body>
+     <urn:ZBAPICUSSAVE_FM>
+        <!--You may enter the following 9 items in any order-->
+        <CITY>${req.body.cuscity}</CITY>
+        <CONTNO>${req.body.contno}</CONTNO>
+        <COUNTRY>${req.body.cuscountry}</COUNTRY>
+        <CUS_ID>${req.body.cusid}</CUS_ID>
+        <MAIL_ID>${req.body.cusmail}</MAIL_ID>
+        <NAME>${req.body.cusname}</NAME>
+        <POSTCODE>${req.body.cuscode}</POSTCODE>
+        <REGION>${req.body.cusregion}</REGION>
+        <STREET>${req.body.cusstreet}</STREET>
+     </urn:ZBAPICUSSAVE_FM>
+  </soapenv:Body>
+</soapenv:Envelope>`
+const temp={TYPE:'//SOAP:Body//RETURN/TYPE'};
+  const url = 'http://dxktpipo.kaarcloud.com:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BC_CUSSAVE&receiverParty=&receiverService=&interface=SI_CUSSAVE1&interfaceNamespace=http://bala.com';
+ var xmlData;
+ (async () => {
+   const { response } = await soapRequest({ url: url, headers: sampleHeaders, xml: xml, timeout: 10000 });
+   const { headers, body, statusCode } = response;
+   console.log(headers);
+   console.log(body);
+   console.log(statusCode);
+ 
+   xmlData = body;
+   const result = await transform(xmlData, temp);
+   console.log(result);
+   res.status(200).send(result);
+ })();
+
+});
+
 router.post('/cussaleor',(req,res)=>{
   var cusid=req.body.cusid;
   //cusid=179999;
@@ -311,7 +354,7 @@ router.post('/cussaleor',(req,res)=>{
      </urn:ZBAPICUSSALEOR_FM>
   </soapenv:Body>
 </soapenv:Envelope>`
-const temp={SALESORDERS:['//SOAP:Body//IT_CUSSALEOR/item',{SD_DOC:'SD_DOC',ITM_NUMBER:'ITM_NUMBER',MATERIAL:'MATERIAL',SHORT_TEXT:'SHORT_TEXT',NAME:'NAME',DOC_DATE:'DOC_DATE',NET_VAL:'NET_VAL',CURRENCY:'CURRENCY',SALES_ORG:'SALES_ORG',EXCHG_RATE:'EXCHG_RATE'}]
+const temp={SALESORDERS:['//SOAP:Body//IT_CUSSALEOR/item',{SD_DOC:'SD_DOC',ITM_NUMBER:'ITM_NUMBER',MATERIAL:'MATERIAL',SHORT_TEXT:'SHORT_TEXT',NAME:'NAME',DOC_DATE:'DOC_DATE',NET_VAL:'NET_VAL_HD',CURRENCY:'CURRENCY',SALES_ORG:'SALES_ORG',EXCHG_RATE:'EXCHG_RATE',DIVISION:'DIVISION',PLANT:'PLANT',STORE_LOC:'STORE_LOC',SHIP_POINT:'SHIP_POINT',DLV_QTY:'DLV_QTY',SALES_UNIT:'SALES_UNIT',DOC_STATUS:'DOC_STATUS',CREATION_DATE:'CREATION_DATE',CREATION_TIME:'CREATION_TIME'}]
 };
   const url = 'http://dxktpipo.kaarcloud.com:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BC_CUSSALEOR&receiverParty=&receiverService=&interface=SI_CUSSALEOR&interfaceNamespace=http://bala.com';
  var xmlData;
@@ -328,7 +371,7 @@ const temp={SALESORDERS:['//SOAP:Body//IT_CUSSALEOR/item',{SD_DOC:'SD_DOC',ITM_N
    res.status(200).send(result);
  })();
 
-})
+});
 
 router.post('/cuscredit',(req,res)=>{
    var cusid=req.body.cusid;
@@ -367,7 +410,209 @@ RETURN:'//SOAP:Body//RETURN/TYPE'
     res.status(200).send(result);
   })();
 
-})
+});
 
+router.post('/cuspayage',(req,res)=>{
+  var cusid=req.body.cusid;
+  //var cusid=11;
+  var xml=`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+  <soapenv:Header/>
+  <soapenv:Body>
+     <urn:ZBAPICUSPAYAGE_FM>
+        <!--You may enter the following 2 items in any order-->
+        <CUSID>${cusid}</CUSID>
+        
+     </urn:ZBAPICUSPAYAGE_FM>
+  </soapenv:Body>
+</soapenv:Envelope>`
+const temp={PAYAGE:['//SOAP:Body//IT_PAYAGE/item',{COMP_CODE:'COMP_CODE',ITEM_NUM:'ITEM_NUM',ALLOC_NMBR:'ALLOC_NMBR',FISC_YEAR:'FISC_YEAR',DOC_NO:'DOC_NO',DOC_DATE:'DOC_DATE',LC_AMOUNT:'LC_AMOUNT',CURRENCY:'CURRENCY',PSTNG_DATE:'PSTNG_DATE',AGE:'CLR_DOC_NO'}]
+};
+  const url = 'http://dxktpipo.kaarcloud.com:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BC_CUSPAYAGE&receiverParty=&receiverService=&interface=SI_CUSPAYAGE&interfaceNamespace=http://bala.com';
+ var xmlData;
+ (async () => {
+   const { response } = await soapRequest({ url: url, headers: sampleHeaders, xml: xml, timeout: 10000 });
+   const { headers, body, statusCode } = response;
+   console.log(headers);
+   console.log(body);
+   console.log(statusCode);
+ 
+   xmlData = body;
+   const result = await transform(xmlData, temp);
+   console.log(result);
+   res.status(200).send(result);
+ })();
+
+});
+
+router.post('/cusmasup',(req,res)=>{
+  let data = [];
+  var filename;
+  let resultArray =[];
+  var store = multer.diskStorage({
+    destination:function(req,file,cb){
+        cb(null, './uploads');
+    },
+    filename:function(req,file,cb){
+      filename=file.originalname;
+        cb(null, file.originalname);
+    }
+});
+
+
+var upload = multer({storage:store}).single('file');
+upload(req,res,err=>{
+  if(err){
+      return res.status(501).send("File upload unsuccessful");
+  }
+  filepath = path.join(__dirname,'../uploads') +'/'+ filename;
+const file = reader.readFile(filepath);
+  
+
+  
+const sheets = file.SheetNames
+  
+for(let i = 0; i < sheets.length; i++)
+{
+   const temp = reader.utils.sheet_to_json(
+        file.Sheets[file.SheetNames[i]])
+   temp.forEach((res) => {
+      data.push(res)
+   })
+}
+
+for(let i=0; i<data.length; i++)
+{
+var xml=`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+<soapenv:Header/>
+<soapenv:Body>
+   <urn:ZBAPI_CUSMASUP_FM>
+      <!--You may enter the following 13 items in any order-->
+      <CITY>${data[i].CITY}</CITY>
+      <CONTNO>${data[i].CONTNO}</CONTNO>
+      <COUNTRY>${data[i].COUNTRY}</COUNTRY>
+      <CUS_ID>${data[i].CUS_ID}</CUS_ID>
+      <DISTCHANNEL>${data[i].DISTCHANNEL}</DISTCHANNEL>
+      <DIVISION>${data[i].DIVISION}</DIVISION>
+      <FIRSTNAME>${data[i].FIRSTNAME}</FIRSTNAME>
+      <LANG>${data[i].LANG}</LANG>
+      <LASTNAME>${data[i].LASTNAME}</LASTNAME>
+      <POSTCODE>${data[i].POSTCODE}</POSTCODE>
+      <REGION>${data[i].REGION}</REGION>
+      <SALEORG>${data[i].SALEORG}</SALEORG>
+      <STREET>${data[i].STREET}</STREET>
+   </urn:ZBAPI_CUSMASUP_FM>
+</soapenv:Body>
+</soapenv:Envelope>`
+const temp={cusid:'//SOAP:Body//CUSID_OUT'};
+  const url = 'http://dxktpipo.kaarcloud.com:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BC_CUSMASUP&receiverParty=&receiverService=&interface=SI_CUSMASUP&interfaceNamespace=http://bala.com';
+ var xmlData;
+ (async () => {
+   const { response } = await soapRequest({ url: url, headers: sampleHeaders, xml: xml, timeout: 10000 });
+   const { headers, body, statusCode } = response;
+   console.log(headers);
+   console.log(body);
+   console.log(statusCode);
+ 
+   xmlData = body;
+   const result = await transform(xmlData, temp);
+   console.log(result);
+   resultArray.push(result);
+   
+ })();
+console.log(resultArray);
+}
+
+
+
+});
+setTimeout(()=> res.status(200).send(resultArray),4000)
+
+
+});
+router.post('/cussignup',(req,res)=>{
+  //console.log(req.body);
+  var result;
+  var xml=`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+  <soapenv:Header/>
+  <soapenv:Body>
+     <urn:ZBAPI_CUSMASUP_FM>
+        <!--You may enter the following 13 items in any order-->
+        <CITY>Not provided</CITY>
+        <CONTNO>Not provided</CONTNO>
+        <COUNTRY>NP</COUNTRY>
+        <CUS_ID>TESTCRD</CUS_ID>
+        <DISTCHANNEL>S1</DISTCHANNEL>
+        <DIVISION>S1</DIVISION>
+        <FIRSTNAME>${req.body.name}</FIRSTNAME>
+        <LANG>NP</LANG>
+        <LASTNAME>.</LASTNAME>
+        <POSTCODE>000000</POSTCODE>
+        <REGION>NP</REGION>
+        <SALEORG>SA01</SALEORG>
+        <STREET>Not provided</STREET>
+     </urn:ZBAPI_CUSMASUP_FM>
+  </soapenv:Body>
+</soapenv:Envelope>`
+const temp={cusid:'//SOAP:Body//CUSID_OUT'};
+  const url = 'http://dxktpipo.kaarcloud.com:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BC_CUSMASUP&receiverParty=&receiverService=&interface=SI_CUSMASUP&interfaceNamespace=http://bala.com';
+ var xmlData;
+ (async () => {
+   const { response } = await soapRequest({ url: url, headers: sampleHeaders, xml: xml, timeout: 10000 });
+   const { headers, body, statusCode } = response;
+   console.log(headers);
+   console.log(body);
+   console.log(statusCode);
+ 
+   xmlData = body;
+    result = await transform(xmlData, temp);
+   console.log(result);
+   res.status(200).send(result);
+   
+ })();
+ setTimeout(()=>{
+  var xml1=`<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+  <soapenv:Header/>
+  <soapenv:Body>
+     <urn:ZBAPICUSSIGNUP_FM>
+        <!--You may enter the following 5 items in any order-->
+        <CUS_ID>${result.cusid}</CUS_ID>
+        <MAILID>${req.body.email}</MAILID>
+        <NAME>${req.body.name}</NAME>
+        <PASS>${req.body.password}</PASS>
+        <STYPE>C</STYPE>
+     </urn:ZBAPICUSSIGNUP_FM>
+  </soapenv:Body>
+</soapenv:Envelope>`
+const temp1={TYPE:'//SOAP:Body//RETURN/TYPE'};
+  const url1 = 'http://dxktpipo.kaarcloud.com:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BC_CUSSIGNUP&receiverParty=&receiverService=&interface=SI_CUSSIGNUP&interfaceNamespace=http://bala.com';
+ var xmlData1;
+ (async () => {
+   const { response } = await soapRequest({ url: url1, headers: sampleHeaders, xml: xml1, timeout: 10000 });
+   const { headers, body, statusCode } = response;
+   console.log(headers);
+   console.log(body);
+   console.log(statusCode);
+ 
+   xmlData1 = body;
+   const result1 = await transform(xmlData1, temp1);
+   console.log(result1);
+   
+ })();
+
+ },6000)
+});
+router.get('/cusinvoice',(req,res)=>{
+  const path1 = path.join(__dirname,'../uploads') +'/invoice.mp4';
+  //res.status(200).send("Hi");
+  const stat = fs.statSync(path1)
+  const fileSize = stat.size
+  console.log(fileSize);
+  const head = {
+    'Content-Length': fileSize,
+    'Content-Type': 'video/mp4',
+  }
+  res.writeHead(200, head)
+  fs.createReadStream(path1).pipe(res)
+});
 
 module.exports = router;
